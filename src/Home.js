@@ -1,49 +1,37 @@
-import React,{useState,useEffect} from 'react'
+import React,{useState,useEffect} from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom'
 
-export default function Home({url,category, search, addToCart}) {
+export default function Home({url,category,addToCart}) {
   const [products, setProducts] = useState([]);
 
-  useEffect(async() => {
-    if (category !== null || search !== '') {
-      let address = '';
-      if (category !== null) {
-        address = url + 'products/getproducts.php/' + category?.id;
-      }
-      else {
-        address = url + 'products/search.php/' + search;
-      }
-
-      try {
-        const response = await fetch(address);
-        const json = await response.json();
-        if (response.ok) {
+  useEffect(() => {
+    if (category !== null) {
+      axios.get(url + 'products/getproducts.php/' + category?.id)
+        .then((response) => {
+          const json = response.data;
           setProducts(json);
-        } else {
-          alert(json.error);
-        }
-      } catch (error) {
-        alert(error);
-      }
-    }
-
-  }, [category,search]) // If category or search changes.
+        }).catch (error => {
+          if (error.response === undefined) {
+            alert(error);
+          } else {
+            alert(error.response.data.error);
+          }
+        })
+    } 
+  },[category])
 
   return (
-    <div>
+    <div style={{'padding-top': '100px'}}>
       <h3>Products for {category?.name}</h3>
-      {search &&
-        <p>{search}</p>
-      }
-      {products.map(product => (
-        <div key={product.id}>
-          <p>{product.name}</p>
-          <div>
-            <img src={url + 'images/' + product.image} alt="" />
+        {products.map(product => (
+          <div key={product.id}>
+            <p>
+              {product.name}
+            </p>
+            <button class="btn btn-primary" type="button" onClick={e => addToCart(product)}>Add</button>
           </div>
-          <button className="btn btn-primary" type="button" onClick={e => addToCart(product)}>Add</button>
-        </div>
-      ))}
-
+        ))}
     </div>
   )
 }
