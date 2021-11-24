@@ -1,3 +1,7 @@
+body {
+  font-family: 'Courier New', Courier, monospace;
+}
+
 #content{
   margin-top: 10px;
   margin-bottom: 75px;

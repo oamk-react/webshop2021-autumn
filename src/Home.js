@@ -1,6 +1,7 @@
 import React,{useState,useEffect} from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom';
+import './Home.css';
 
 export default function Home({url,category,addToCart}) {
   const [products, setProducts] = useState([]);
@@ -11,6 +12,7 @@ export default function Home({url,category,addToCart}) {
         .then((response) => {
           const json = response.data;
           setProducts(json);
+          //console.log(json);
         }).catch (error => {
           if (error.response === undefined) {
             alert(error);
@@ -26,10 +28,21 @@ export default function Home({url,category,addToCart}) {
       <h3>Products for {category?.name}</h3>
         {products.map(product => (
           <div key={product.id}>
-            <p>
-              {product.name}
-            </p>
-            <button class="btn btn-primary" type="button" onClick={e => addToCart(product)}>Add</button>
+            <Link
+              to={{
+                pathname: '/product',
+                state: {
+                  id: product.id,
+                  name: product.name,
+                  price: product.price  
+                }
+              }}
+            >
+              <p>{product.name} {product.price}</p>
+              <img src={url + 'images/' + product.image} alt={product.name}/> 
+              
+            </Link>
+            {/* <button class="btn btn-primary" type="button" onClick={e => addToCart(product)}>Add</button> */}
           </div>
         ))}
     </div>

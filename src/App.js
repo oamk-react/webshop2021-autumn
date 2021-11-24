@@ -4,11 +4,14 @@ import './App.css';
 import Navbar from './inc/Navbar';
 import Footer from './inc/Footer';
 import Home from './Home';
+import Product from './Product';
+import Order from './Order';
 
 const URL = 'http://localhost:8888/webshop/';
 
 function App() {
   const [category,setCategory] = useState(null);
+  const [product,setProduct] = useState(null);
   const [cart, setCart] = useState([]);
 
   let location = useLocation();
@@ -20,17 +23,34 @@ function App() {
   },[])
 
 
-  useEffect(()=> {
-    
+  useEffect(()=> {   
     if (location.state !== undefined) {
-      setCategory({id: location.state.id,name: location.state.name});
+      if (location.pathname==="/") {
+        setCategory({id: location.state.id,name: location.state.name});
+      } else if (location.pathname ==="/product") {
+        setProduct({id: location.state.id,name: location.state.name,price: location.state.price});
+      }
     }
   },[location.state])
 
   function addToCart(product) {
-    const newCart = [...cart,product];
-    setCart(newCart);
-    localStorage.setItem('cart',JSON.stringify(newCart));
+    if (cart.some(item => item.id === product.id)) {
+      const existingProduct = cart.filter(item => item.id === product.id);
+      updateAmount(parseInt(existingProduct[0].amount) + 1,product);
+    } else {
+      product["amount"] = 1;
+      const newCart = [...cart,product];
+      setCart(newCart);
+      localStorage.setItem('cart',JSON.stringify(newCart));
+    }
+  }
+
+  function updateAmount(amount,product) {
+    product.amount = amount;
+    const index = cart.findIndex((item => item.id === product.id));
+    const modifiedCart = Object.assign([...cart],{[index]:product});
+    setCart(modifiedCart);
+    localStorage.setItem('cart',JSON.stringify(modifiedCart));
   }
 
   return (
@@ -44,10 +64,27 @@ function App() {
               <Home
                 url={URL}
                 category={category}
-                addToCart={addToCart}
+               
               />
             }
             exact
+          />
+          <Route
+            path="/product"
+            render={() => 
+              <Product
+                url={URL}
+                product={product}
+                addToCart={addToCart}
+              />
+            }
+          />
+          <Route path="/order" render={() => 
+            <Order
+              cart={cart}
+              updateAmount={updateAmount}
+            />
+          }  
           />
         </Switch>
       </div>
